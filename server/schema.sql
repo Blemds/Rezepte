@@ -1,0 +1,49 @@
+CREATE DATABASE IF NOT EXISTS recipes_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE recipes_app;
+
+CREATE TABLE IF NOT EXISTS dishes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  description TEXT NOT NULL,
+  image_path VARCHAR(255) NULL,
+  portions INT NOT NULL DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS ingredients (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  dish_id INT NOT NULL,
+  name VARCHAR(140) NOT NULL,
+  amount VARCHAR(120) NOT NULL,
+  CONSTRAINT fk_ingredients_dish FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS recipe_steps (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  dish_id INT NOT NULL,
+  step_index INT NOT NULL,
+  content TEXT NOT NULL,
+  CONSTRAINT fk_steps_dish FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS shopping_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(160) NOT NULL,
+  is_done TINYINT(1) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS meal_plan (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  day_of_week TINYINT NOT NULL COMMENT '0=Mo 1=Di 2=Mi 3=Do 4=Fr 5=Sa 6=So',
+  meal_slot ENUM('mittag','abend') NOT NULL DEFAULT 'mittag',
+  dish_id INT NULL,
+  UNIQUE KEY uq_day_slot (day_of_week, meal_slot),
+  CONSTRAINT fk_mealplan_dish FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS favorites (
+  dish_id INT NOT NULL PRIMARY KEY,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_fav_dish FOREIGN KEY (dish_id) REFERENCES dishes(id) ON DELETE CASCADE
+);
